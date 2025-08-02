@@ -1,5 +1,7 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -48,6 +50,9 @@ public class MusicPlayerGUI extends JFrame {
         
         // set a default path for file explorer
         jFileChooser.setCurrentDirectory(new File("src/assets"));
+
+        // filter file chooser to only see .mp3 files
+        jFileChooser.setFileFilter(new FileNameExtensionFilter("MP3", "mp3"));
 
         addGuiComponents();
     }
@@ -107,10 +112,12 @@ public class MusicPlayerGUI extends JFrame {
         loadSong.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                jFileChooser.showOpenDialog(MusicPlayerGUI.this);
+                // an integer is returned to us to let us know what the user did
+                int result = jFileChooser.showOpenDialog(MusicPlayerGUI.this);
                 File selectedFile = jFileChooser.getSelectedFile();
 
-                if(selectedFile != null) {
+                // this means that we are also checking to see if the user pressed the "open" button
+                if(result == JFileChooser.APPROVE_OPTION && selectedFile != null) {
                     // create a song obj based on selected file
                     Song song = new Song(selectedFile.getPath());
 
@@ -121,7 +128,7 @@ public class MusicPlayerGUI extends JFrame {
                     updateSongTitleAndArtist(song);
 
                     // toggle on pause button and toggle off play button
-                    enablePauseButton();
+                    enablePauseButtonDisablePlayButton();
                 }
             }
         });
@@ -159,6 +166,16 @@ public class MusicPlayerGUI extends JFrame {
         playButton.setBorderPainted(false);
         playButton.setBackground(null);
         playButton.setFocusPainted(false);
+        playButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // toggle off play button and toggle on pause button
+                enablePauseButtonDisablePlayButton();
+
+                // play or resume song
+                musicPlayer.playCurrentSong();
+            }
+        });
         playbackButtons.add(playButton);
 
         // pause button
@@ -167,6 +184,16 @@ public class MusicPlayerGUI extends JFrame {
         pauseButton.setBackground(null);
         pauseButton.setFocusPainted(false);
         pauseButton.setVisible(false);
+        pauseButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // toggle off pause button and toggle on play button
+                enablePlayButtonDisablePauseButton();
+
+                // pause the song
+                musicPlayer.pauseSong();
+            }
+        });
         playbackButtons.add(pauseButton);
 
         // next button
@@ -184,8 +211,8 @@ public class MusicPlayerGUI extends JFrame {
         songArtist.setText(song.getSongArtist());
     }
 
-    // disable play button and enable pause button 
-    private void enablePauseButton() {
+    // enable pause button and disable play button 
+    private void enablePauseButtonDisablePlayButton() {
         // retrieve reference to play button from playbackButtons panel
         JButton playButton = (JButton) playbackButtons.getComponent(1);
         JButton pauseButton = (JButton) playbackButtons.getComponent(2);
@@ -199,8 +226,8 @@ public class MusicPlayerGUI extends JFrame {
         pauseButton.setEnabled(true);
     }
 
-    // disable pause button and enable play button 
-    private void enablePlayButton() {
+    // enable play button and disable pause button 
+    private void enablePlayButtonDisablePauseButton() {
         // retrieve reference to play button from playbackButtons panel
         JButton playButton = (JButton) playbackButtons.getComponent(1);
         JButton pauseButton = (JButton) playbackButtons.getComponent(2);
