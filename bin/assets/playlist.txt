@@ -1,0 +1,3 @@
+C:\Users\bbyfo\OneDrive\Documents\Visual Studio Code\MusicPlayerApp\src\assets\Duel of Friendship - Shinkichi Mitsumune.mp3
+C:\Users\bbyfo\OneDrive\Documents\Visual Studio Code\MusicPlayerApp\src\assets\Peace & Hope - Shinkichi Mitsumune.mp3
+C:\Users\bbyfo\OneDrive\Documents\Visual Studio Code\MusicPlayerApp\src\assets\Stickerbush Symphony - David Wise.mp3

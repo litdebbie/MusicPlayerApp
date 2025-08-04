@@ -109,7 +109,7 @@ public class MusicPlayerGUI extends JFrame {
                 musicPlayer.setCurrentFrame(frame);
 
                 // update current time in milli as well
-                musicPlayer.setCurrentTimeInMilli((int) (frame / (1.83 * musicPlayer.getCurrentSong().getFrameRatePerMilliseconds())));
+                musicPlayer.setCurrentTimeInMilli((int) (frame / (1.3 * musicPlayer.getCurrentSong().getFrameRatePerMilliseconds())));
 
                 // resume the song
                 musicPlayer.playCurrentSong();
@@ -180,6 +180,25 @@ public class MusicPlayerGUI extends JFrame {
         playlistMenu.add(createPlaylist);
 
         JMenuItem loadPlaylist = new JMenuItem("Load Playlist");
+        loadPlaylist.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser jFileChooser = new JFileChooser();
+                jFileChooser.setFileFilter(new FileNameExtensionFilter("Playlist", "txt"));
+                jFileChooser.setCurrentDirectory(new File("src/assets"));
+
+                int result = jFileChooser.showOpenDialog(MusicPlayerGUI.this);
+                File selectedFile = jFileChooser.getSelectedFile();
+
+                if(result == JFileChooser.APPROVE_OPTION && selectedFile != null) {
+                    // stop the music
+                    musicPlayer.stopSong();
+
+                    // load playlist
+                    musicPlayer.loadPlaylist(selectedFile);
+                }
+            }
+        });
         playlistMenu.add(loadPlaylist);
 
         add(toolBar);
@@ -247,12 +266,12 @@ public class MusicPlayerGUI extends JFrame {
         playbackSlider.setValue(frame);
     }
 
-    private void updateSongTitleAndArtist(Song song) {
+    public void updateSongTitleAndArtist(Song song) {
         songTitle.setText(song.getSongTitle());
         songArtist.setText(song.getSongArtist());
     }
 
-    private void updatePlaybackSlider(Song song) {
+    public void updatePlaybackSlider(Song song) {
         // update max count for slider
         playbackSlider.setMaximum(song.getMp3File().getFrameCount());
 
@@ -277,7 +296,7 @@ public class MusicPlayerGUI extends JFrame {
     }
 
     // enable pause button and disable play button 
-    private void enablePauseButtonDisablePlayButton() {
+    public void enablePauseButtonDisablePlayButton() {
         // retrieve reference to play button from playbackButtons panel
         JButton playButton = (JButton) playbackButtons.getComponent(1);
         JButton pauseButton = (JButton) playbackButtons.getComponent(2);
@@ -292,7 +311,7 @@ public class MusicPlayerGUI extends JFrame {
     }
 
     // enable play button and disable pause button 
-    private void enablePlayButtonDisablePauseButton() {
+    public void enablePlayButtonDisablePauseButton() {
         // retrieve reference to play button from playbackButtons panel
         JButton playButton = (JButton) playbackButtons.getComponent(1);
         JButton pauseButton = (JButton) playbackButtons.getComponent(2);

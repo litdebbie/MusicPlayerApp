@@ -1,5 +1,9 @@
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
+import java.util.ArrayList;
 
 import javazoom.jl.player.advanced.AdvancedPlayer;
 import javazoom.jl.player.advanced.PlaybackEvent;
@@ -17,6 +21,8 @@ public class MusicPlayer extends PlaybackListener {
     public Song getCurrentSong() {
         return currentSong;
     }
+
+    private ArrayList<Song> playlist;
 
     // use JLayer library to create an AdvancedPlayer obj which will handle playing the music
     private AdvancedPlayer advancedPlayer;
@@ -46,6 +52,48 @@ public class MusicPlayer extends PlaybackListener {
 
         // play the current song if not null
         if(currentSong != null) playCurrentSong();
+    }
+
+    public void loadPlaylist(File playlistFile) {
+        playlist = new ArrayList<>();
+
+        // store the paths from the text file into the playlist array list
+        try {
+            FileReader fileReader = new FileReader(playlistFile);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+            // reach each line from the text file and store the text into the songPath variable
+            String songPath;
+            while((songPath = bufferedReader.readLine()) != null) {
+                // create song object based on song path
+                Song song = new Song(songPath);
+
+                // add to playlist array list
+                playlist.add(song);
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        if(playlist.size() > 0) {
+            // reset playback slider
+            musicPlayerGUI.setPlaybackSliderValue(0);
+            currentTimeInMilli = 0;
+
+            // update current song to the first song in the playlist
+            currentSong = playlist.get(0);
+
+            // start fromt he beginning frame
+            currentFrame = 0;
+
+            // update gui
+            musicPlayerGUI.enablePauseButtonDisablePlayButton();
+            musicPlayerGUI.updateSongTitleAndArtist(currentSong);
+            musicPlayerGUI.updatePlaybackSlider(currentSong);
+
+            // start song
+            playCurrentSong();
+        }
     }
 
     public void pauseSong() {
@@ -137,18 +185,18 @@ public class MusicPlayer extends PlaybackListener {
                 while(!isPaused) {
                     try {
                         // increment current time in milli
-                    currentTimeInMilli++;
+                        currentTimeInMilli++;
 
-                    // System.out.println(currentTimeInMilli * 1.83);
+                        // System.out.println(currentTimeInMilli * 1.83);
 
-                    // calculate into frame value
-                    int calculatedFrame = (int) ((double) currentTimeInMilli * 1.83 * currentSong.getFrameRatePerMilliseconds());
+                        // calculate into frame value
+                        int calculatedFrame = (int) ((double) currentTimeInMilli * 1.3 * currentSong.getFrameRatePerMilliseconds());
 
-                    // update gui
-                    musicPlayerGUI.setPlaybackSliderValue(calculatedFrame);
+                        // update gui
+                        musicPlayerGUI.setPlaybackSliderValue(calculatedFrame);
 
-                    // mimic 1 millisecond using thread.sleep
-                    Thread.sleep(1);
+                        // mimic 1 millisecond using thread.sleep
+                        Thread.sleep(1);
                     } catch(Exception e) {
                         e.printStackTrace();
                     }
