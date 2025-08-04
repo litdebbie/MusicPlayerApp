@@ -25,6 +25,9 @@ public class Song {
             // calculate frame rate per millisecond
             // frameRatePerMilliseconds = totalFrames / songLength
             frameRatePerMilliseconds = (double) mp3File.getFrameCount() / mp3File.getLengthInMilliseconds();
+            
+            // get songLength in correct format
+            songLength = convertToSongLengthFormat();
 
             // use the jaudiotagger library to create an audiofile obj to read mp3 file's information
             AudioFile audioFile = AudioFileIO.read(new File(filePath));
@@ -35,15 +38,27 @@ public class Song {
             if(tag != null) {
                 songTitle = tag.getFirst(FieldKey.TITLE);
                 songArtist = tag.getFirst(FieldKey.ARTIST);
+
+                // check if song title or artist field is empty
+                if(tag.getFirst(FieldKey.TITLE) == "") songTitle = "Unknown";
+                if(tag.getFirst(FieldKey.ARTIST) == "") songArtist = "Unknown";
             } else {
                 // could not read through mp3 file's meta data
-                songTitle = "Unknown";
-                songArtist = "Unknown";
+                songTitle = "N/A";
+                songArtist = "N/A";
             }
 
         } catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private String convertToSongLengthFormat() {
+        long minutes = mp3File.getLengthInSeconds() / 60;
+        long seconds = mp3File.getLengthInSeconds() % 60;
+        String formattedTime = String.format("%02d:%02d", minutes, seconds);
+
+        return formattedTime;
     }
 
     // getters
