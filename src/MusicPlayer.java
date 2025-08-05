@@ -1,8 +1,4 @@
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
+import java.io.*;
 import java.util.ArrayList;
 
 import javazoom.jl.player.advanced.AdvancedPlayer;
@@ -35,6 +31,10 @@ public class MusicPlayer extends PlaybackListener {
 
     // boolean flag used to tell when the song has finished
     private boolean songFinished;
+
+    // boolean flags used to tell when next/previous button pressed
+    private boolean pressedNext;
+    private boolean pressedPrev;
 
     // stores the last frame when the playback is finished (used for pausing and resuming)
     private int currentFrame;
@@ -127,8 +127,12 @@ public class MusicPlayer extends PlaybackListener {
         // check to see if the end of the the playlist has been reached
         if(currentPlaylistIndex + 1 >= playlist.size()) return;
 
+        pressedNext = true;
+
         // stop the song if possible
-        if(!songFinished) stopSong();
+        if(!songFinished) {
+            stopSong();
+        }
 
         // increase current playlist index
         currentPlaylistIndex++;
@@ -156,10 +160,14 @@ public class MusicPlayer extends PlaybackListener {
         if(playlist == null) return;
 
         // check to see if we can go to previous song
-        if(currentPlaylistIndex == 0) return;
+        if(currentPlaylistIndex - 1 < 0) return;
+
+        pressedPrev = true;
 
         // stop the song if possible
-        if(!songFinished) stopSong();
+        if(!songFinished) {
+            stopSong();
+        }
 
         // decrease current playlist index
         currentPlaylistIndex--;
@@ -278,6 +286,9 @@ public class MusicPlayer extends PlaybackListener {
         // this method gets called in the beginning of the song
         System.out.println("Playback Started");
         songFinished = false;
+
+        pressedNext = false;
+        pressedPrev = false;
     }
 
     @Override
@@ -290,6 +301,9 @@ public class MusicPlayer extends PlaybackListener {
             // calculate current frame to resume song properly
             currentFrame += (int) ((double) evt.getFrame() * currentSong.getFrameRatePerMilliseconds());
         } else {
+            // if the user pressed next or prev we don't need to execute the rest of the code
+            if(pressedNext || pressedPrev) return;
+
             // when the song ends
             songFinished = true;
 
