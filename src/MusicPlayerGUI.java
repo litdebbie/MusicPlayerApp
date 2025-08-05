@@ -214,6 +214,13 @@ public class MusicPlayerGUI extends JFrame {
         prevButton.setBorderPainted(false);
         prevButton.setBackground(null);
         prevButton.setFocusPainted(false);
+        prevButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // go to the previous song
+                musicPlayer.previousSong();
+            }
+        });
         playbackButtons.add(prevButton);
 
         // play button
@@ -256,6 +263,13 @@ public class MusicPlayerGUI extends JFrame {
         nextButton.setBorderPainted(false);
         nextButton.setBackground(null);
         nextButton.setFocusPainted(false);
+        nextButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // go to the next song
+                musicPlayer.nextSong();
+            }
+        });
         playbackButtons.add(nextButton);
 
         add(playbackButtons);
