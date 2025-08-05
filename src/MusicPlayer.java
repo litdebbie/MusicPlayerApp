@@ -55,9 +55,26 @@ public class MusicPlayer extends PlaybackListener {
 
     public void loadSong(Song song) {
         currentSong = song;
+        playlist = null;
+
+        // stop the song if possible
+        if(!songFinished) {
+            stopSong();
+        }
 
         // play the current song if not null
-        if(currentSong != null) playCurrentSong();
+        if(currentSong != null) {
+            // reset frame
+            currentFrame = 0;
+
+            // reset current time in milli
+            currentTimeInMilli = 0;
+
+            // update gui
+            musicPlayerGUI.setPlaybackSliderValue(0);
+            
+            playCurrentSong();
+        }
     }
 
     public void loadPlaylist(File playlistFile) {
@@ -258,7 +275,7 @@ public class MusicPlayer extends PlaybackListener {
                     }
                 }
 
-                while(!isPaused) {
+                while(!isPaused && !songFinished && !pressedNext && !pressedPrev) {
                     try {
                         // increment current time in milli
                         currentTimeInMilli++;
