@@ -168,6 +168,10 @@ public class MusicPlayer extends PlaybackListener {
         musicPlayerGUI.updateSongTitleAndArtist(currentSong);
         musicPlayerGUI.updatePlaybackSlider(currentSong);
         
+        // reset playback slider
+        musicPlayerGUI.setPlaybackSliderValue(0);
+        System.out.println("nextSong isPaused: " + isPaused);
+
         // play the song
         playCurrentSong();
     }
@@ -203,6 +207,9 @@ public class MusicPlayer extends PlaybackListener {
         musicPlayerGUI.updateSongTitleAndArtist(currentSong);
         musicPlayerGUI.updatePlaybackSlider(currentSong);
         
+        // reset playback slider
+        musicPlayerGUI.setPlaybackSliderValue(0);
+
         // play the song
         playCurrentSong();
     }
@@ -211,6 +218,9 @@ public class MusicPlayer extends PlaybackListener {
         if(currentSong == null) return;
 
         try {
+            // reset songFinished flag before starting a new song
+            songFinished = false;
+
             // read mp3 audio data
             FileInputStream fileInputStream = new FileInputStream(currentSong.getFilePath());
             BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
@@ -222,6 +232,9 @@ public class MusicPlayer extends PlaybackListener {
             // start music
             startMusicThread();
             
+            pressedNext = false;
+            pressedPrev = false;
+
             // start playback slider thread
             startPlaybackSliderThread();
 
@@ -266,7 +279,7 @@ public class MusicPlayer extends PlaybackListener {
                 if(isPaused) {
                     try {
                         // wait till it gets notified by other thread to continue
-                        // makes sure that isPausedd boolean flag updates to false before continuing
+                        // makes sure that isPaused boolean flag updates to false before continuing
                         synchronized(playSignal) {
                             playSignal.wait();
                         }
@@ -281,9 +294,10 @@ public class MusicPlayer extends PlaybackListener {
                         currentTimeInMilli++;
 
                         // System.out.println(currentTimeInMilli * 1.83);
+                        // System.out.println("current time: " + currentTimeInMilli);
 
                         // calculate into frame value
-                        int calculatedFrame = (int) ((double) currentTimeInMilli * 1.3 * currentSong.getFrameRatePerMilliseconds());
+                        int calculatedFrame = (int) ((double) currentTimeInMilli * 1.4 * currentSong.getFrameRatePerMilliseconds());
 
                         // update gui
                         musicPlayerGUI.setPlaybackSliderValue(calculatedFrame);
@@ -302,6 +316,7 @@ public class MusicPlayer extends PlaybackListener {
     public void playbackStarted(PlaybackEvent evt) {
         // this method gets called in the beginning of the song
         System.out.println("Playback Started");
+
         songFinished = false;
 
         pressedNext = false;

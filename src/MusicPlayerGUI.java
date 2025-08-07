@@ -109,7 +109,7 @@ public class MusicPlayerGUI extends JFrame {
                 musicPlayer.setCurrentFrame(frame);
 
                 // update current time in milli as well
-                musicPlayer.setCurrentTimeInMilli((int) (frame / (1.3 * musicPlayer.getCurrentSong().getFrameRatePerMilliseconds())));
+                musicPlayer.setCurrentTimeInMilli((int) (frame / (1.4 * musicPlayer.getCurrentSong().getFrameRatePerMilliseconds())));
 
                 // resume the song
                 musicPlayer.playCurrentSong();
@@ -305,7 +305,7 @@ public class MusicPlayerGUI extends JFrame {
         labelBeginning.setForeground(TEXT_COLOR);
 
         // end will vary depending on the song
-        JLabel labelEnd= new JLabel(song.getSongLength());
+        JLabel labelEnd = new JLabel(song.getSongLength());
         labelEnd.setFont(new Font("Dialog", Font.BOLD, 18));
         labelEnd.setForeground(TEXT_COLOR);
 
