@@ -32,6 +32,9 @@ public class MusicPlayer extends PlaybackListener {
     // boolean flag used to tell when the song has finished
     private boolean songFinished;
 
+    // boolean flag used to tell when the playlist has finished
+    private boolean playlistFinished;
+
     // boolean flags used to tell when next/previous button pressed
     private boolean pressedNext;
     private boolean pressedPrev;
@@ -56,6 +59,7 @@ public class MusicPlayer extends PlaybackListener {
     public void loadSong(Song song) {
         currentSong = song;
         playlist = null;
+        playlistFinished = false;
 
         // stop the song if possible
         if(!songFinished) {
@@ -94,17 +98,22 @@ public class MusicPlayer extends PlaybackListener {
                 // add to playlist array list
                 playlist.add(song);
             }
+
+            // close bufferedReader
+            bufferedReader.close();
         } catch(Exception e) {
             e.printStackTrace();
         }
 
+        // prepare to play the first song in the playlist
         if(playlist.size() > 0) {
             // reset playback slider
             musicPlayerGUI.setPlaybackSliderValue(0);
             currentTimeInMilli = 0;
 
             // update current song to the first song in the playlist
-            currentSong = playlist.get(0);
+            currentPlaylistIndex = 0;
+            currentSong = playlist.get(currentPlaylistIndex);
 
             // start fromt he beginning frame
             currentFrame = 0;
@@ -113,6 +122,9 @@ public class MusicPlayer extends PlaybackListener {
             musicPlayerGUI.enablePauseButtonDisablePlayButton();
             musicPlayerGUI.updateSongTitleAndArtist(currentSong);
             musicPlayerGUI.updatePlaybackSlider(currentSong);
+
+            // update playlistFinished flag
+            playlistFinished = false;
 
             // start song
             playCurrentSong();
@@ -130,20 +142,28 @@ public class MusicPlayer extends PlaybackListener {
     }
 
     public void stopSong() {
-        if (advancedPlayer != null) {
-            advancedPlayer.stop();
-            advancedPlayer.close();
-            advancedPlayer = null;
+        // check if the song is finished
+        if(songFinished) return;
+
+        try {
+            if (advancedPlayer != null) {
+                advancedPlayer.stop();
+                advancedPlayer.close();
+                advancedPlayer = null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     public void nextSong() {
-        // no need to go to the next song if there is no playlist
-        if(playlist == null) return;
+        // no need to go to the next song if there is no playlist or if the playlist is finished
+        if(playlist == null || playlistFinished) return;
 
         // check to see if the end of the the playlist has been reached
         if(currentPlaylistIndex + 1 >= playlist.size()) return;
 
+        // update pressedNext flag
         pressedNext = true;
 
         // stop the song if possible
@@ -170,19 +190,19 @@ public class MusicPlayer extends PlaybackListener {
         
         // reset playback slider
         musicPlayerGUI.setPlaybackSliderValue(0);
-        System.out.println("nextSong isPaused: " + isPaused);
 
         // play the song
         playCurrentSong();
     }
 
     public void previousSong() {
-        // no need to go to the next song if there is no playlist
-        if(playlist == null) return;
+        // no need to go to the next song if there is no playlist or if the playlist is finished
+        if(playlist == null || playlistFinished) return;
 
         // check to see if we can go to previous song
         if(currentPlaylistIndex - 1 < 0) return;
 
+        // update pressedPrev flag
         pressedPrev = true;
 
         // stop the song if possible
@@ -221,6 +241,9 @@ public class MusicPlayer extends PlaybackListener {
             // reset songFinished flag before starting a new song
             songFinished = false;
 
+            // reset playlistFinished flag
+            playlistFinished = false;
+
             // read mp3 audio data
             FileInputStream fileInputStream = new FileInputStream(currentSong.getFilePath());
             BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
@@ -232,6 +255,7 @@ public class MusicPlayer extends PlaybackListener {
             // start music
             startMusicThread();
             
+            // update flags
             pressedNext = false;
             pressedPrev = false;
 
@@ -294,7 +318,6 @@ public class MusicPlayer extends PlaybackListener {
                         currentTimeInMilli++;
 
                         // System.out.println(currentTimeInMilli * 1.83);
-                        // System.out.println("current time: " + currentTimeInMilli);
 
                         // calculate into frame value
                         int calculatedFrame = (int) ((double) currentTimeInMilli * 1.4 * currentSong.getFrameRatePerMilliseconds());
@@ -317,6 +340,7 @@ public class MusicPlayer extends PlaybackListener {
         // this method gets called in the beginning of the song
         System.out.println("Playback Started");
 
+        // update flags
         songFinished = false;
 
         pressedNext = false;
@@ -327,7 +351,6 @@ public class MusicPlayer extends PlaybackListener {
     public void playbackFinished(PlaybackEvent evt) {
         // this method gets called when the song finishes or if the player gets closed
         System.out.println("Playback Finished");
-        // System.out.println("Actual Stop: " + evt.getFrame());
 
         if(isPaused){
             // calculate current frame to resume song properly
@@ -339,14 +362,44 @@ public class MusicPlayer extends PlaybackListener {
             // when the song ends
             songFinished = true;
 
+            // when the song from "load song" finishes
             if(playlist == null) {
                 // update gui
                 musicPlayerGUI.enablePlayButtonDisablePauseButton();
+
+                // reset frame
+                currentFrame = 0;
+
+                // reset current time in milli
+                currentTimeInMilli = 0;
+
+                // reset playback slider
+                musicPlayerGUI.setPlaybackSliderValue(0);
             } else {
                 // last song in the playlist
                 if(currentPlaylistIndex == playlist.size() - 1) {
+                    // preparing music player to loop back to the first song in the playlist
+
+                    // reset frame
+                    currentFrame = 0;
+
+                    // reset current time in milli
+                    currentTimeInMilli = 0;
+
+                    // update current song to the first song in the playlist
+                    currentPlaylistIndex = 0;
+                    currentSong = playlist.get(currentPlaylistIndex);
+
+                    // reset playback slider
+                    musicPlayerGUI.setPlaybackSliderValue(0);
+
                     // update gui
                     musicPlayerGUI.enablePlayButtonDisablePauseButton();
+                    musicPlayerGUI.updateSongTitleAndArtist(currentSong);
+                    musicPlayerGUI.updatePlaybackSlider(currentSong);
+
+                    // update playlistFinished flag
+                    playlistFinished = true;
                 } else {
                     // go to the next song in the playlist
                     nextSong();
